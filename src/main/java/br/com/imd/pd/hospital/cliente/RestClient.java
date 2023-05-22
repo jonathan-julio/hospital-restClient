@@ -4,42 +4,63 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import br.com.imd.pd.hospital.cliente.models.Hospital;
-import br.com.imd.pd.hospital.cliente.models.HospitalImpl;
-import br.com.imd.pd.hospital.cliente.models.Location;
+import br.com.imd.pd.hospital.cliente.utils.HttpUtils;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-public class RestClient {
+@Command(name = "RestClient")
+public class RestClient implements Runnable {
+    
+    @Option(names = {"-u", "--url"}, description = "URL")
+    private String url;
+    
+    @Option(names = {"-m", "--method"}, description = "HTTP Method")
+    private String method;
+
+    @Option(names = {"-p", "--payload"}, description = "Resquest Payload")
+    private String payload;
+
+    private Map<String, String> headers;
+
+    public RestClient() {
+        this.initHeaders();
+    }  
+
     public static void main(String[] args) throws IOException {
-        String url = "http://localhost:8080/server/location";
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        String jsonBody = "{ \"latitude\": -5.8658099, \"longitude\": -35.2258257 }";
-
-        String response = HttpUtils.post(url, headers, jsonBody);
-
-         
-        JsonElement jsonElement = JsonParser.parseString(response);
-        JsonObject object = jsonElement.getAsJsonObject();
-
-        String name = object.get("name").getAsString();
-        int vacancies = object.get("vacancies").getAsInt();
-        JsonElement locationElement = object.get("location");
-
-        double latitude = locationElement.getAsJsonObject().get("latitude").getAsDouble();
-        double longitude = locationElement.getAsJsonObject().get("longitude").getAsDouble();
-        Location location = new Location(latitude, longitude);
-
-        Hospital hospital = new HospitalImpl(name, vacancies, location);
-
-        System.out.println("Nome do hospital: " + hospital.getName());
-        System.out.println("Número de vagas disponíveis: " + hospital.getVacancies());
-        System.out.println("Localização do hospital: Latitude = "+ hospital.getLocation().getLatitude() 
-                    +"  Longitude = " + hospital.getLocation().getLongitude());
-
+        int exitCode = new CommandLine(new RestClient()).execute(args); 
+        System.exit(exitCode);
     }
+
+    @Override
+    public void run() {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String response = HttpUtils.post(this.url, headers, this.payload);
+
+            JsonElement jsonElement = JsonParser.parseString(response);
+            JsonObject object = jsonElement.getAsJsonObject();
+            String prettyResponde = gson.toJson(object);
+            System.out.println(prettyResponde);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initHeaders() {
+        this.headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+    }
+
+    private void debug() {
+        System.out.println(this.method);
+        System.out.println(this.url);
+        System.out.println(this.payload);
+    } 
 }

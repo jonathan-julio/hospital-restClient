@@ -11,7 +11,7 @@
 
 ## Compilação
 
-Tanto para compilar, quanto para executar é necessário possuir o Java 17.
+Com o Java 17 instalado, execute:
 
 ```bash
 make build     # compila o programa usando o maven e move para a pasta dist/
@@ -19,8 +19,20 @@ make build     # compila o programa usando o maven e move para a pasta dist/
 
 ## Execução
 
-Após compilar o programa. A execução pode ser feita com o comando a seguir.
+Após compilar o programa, a execução pode ser feita como no exemplo a seguir:
 
 ```bash
-java -jar ./dist/hospital-client.jar
+java -jar dist/hospital-client.jar --method POST --url http://localhost:8080/server/location --payload "{ \"latitude\": -5.8658099, \"longitude\": -35.2258257 }"
+
+# OUTPUT SEMELHANTE
+# {
+#   "name": "Hospital Maranhão",
+#   "vacancies": 1,
+#   "location": {
+#     "latitude": -5.6,
+#     "longitude": -45.3
+#   },
+#   "avaliable": true
+# }
+
 ```

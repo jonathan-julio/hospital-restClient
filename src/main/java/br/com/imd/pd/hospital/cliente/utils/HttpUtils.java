@@ -1,4 +1,4 @@
-package br.com.imd.pd.hospital.cliente;
+package br.com.imd.pd.hospital.cliente.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
